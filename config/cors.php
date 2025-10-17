@@ -2,19 +2,7 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Cross-Origin Resource Sharing (CORS) Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure your settings for cross-origin resource sharing
-    | or "CORS". This determines what cross-origin operations may execute
-    | in web browsers. Adjust these settings for your environments.
-    |
-    */
-
     'paths' => [
-        'api',          // match GET https://.../api
         'api/*',
         'sanctum/csrf-cookie',
         'login',
@@ -24,12 +12,10 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'http://localhost:5173',
+        'https://dialiease-4un0.onrender.com', // frontend
+        'https://dialiease-backend-1.onrender.com', // backend itself
+        'http://localhost:5173', // dev
         'http://127.0.0.1:5173',
-        'http://localhost:8000',
-        'http://127.0.0.1:8000',
-        'https://dialiease-4un0.onrender.com',
-        'https://dialiease-backend-1.onrender.com',
     ],
 
     'allowed_origins_patterns' => [],
@@ -45,5 +31,4 @@ return [
     'max_age' => 0,
 
     'supports_credentials' => true,
-
 ];
