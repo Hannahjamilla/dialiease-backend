@@ -82,6 +82,9 @@ use App\Http\Controllers\ProductDetailModalController;
 use App\Http\Controllers\OrderController;
 
 
+Route::get('/', function () {
+    return response()->json(['message' => 'Backend API connected ✅']);
+});
 
 // Public Routes
 Route::post('/login', [LoginController::class, 'login'])->name('api.login');

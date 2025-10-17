@@ -1,46 +1,38 @@
-# --------------------------------------------------------
-# 1. Use official PHP image with Composer preinstalled
-# --------------------------------------------------------
-FROM php:8.2-cli
+# Use the official PHP image with Composer
+FROM php:8.2-fpm
 
-# --------------------------------------------------------
-# 2. Install system dependencies
-# --------------------------------------------------------
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    zip unzip git curl libpng-dev libonig-dev libxml2-dev libzip-dev \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    git \
+    curl
 
-# --------------------------------------------------------
-# 3. Install Composer
-# --------------------------------------------------------
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# Install Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# --------------------------------------------------------
-# 4. Set working directory
-# --------------------------------------------------------
-WORKDIR /var/www/html
+WORKDIR /var/www
 
-# --------------------------------------------------------
-# 5. Copy all files to the container
-# --------------------------------------------------------
+# Copy the application files
 COPY . .
 
-# --------------------------------------------------------
-# 6. Install Laravel dependencies
-# --------------------------------------------------------
+# Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# --------------------------------------------------------
-# 7. Generate Laravel key (optional if you already have APP_KEY in Render)
-# --------------------------------------------------------
-RUN php artisan key:generate || true
+# Generate Laravel key
+RUN php artisan key:generate
 
-# --------------------------------------------------------
-# 8. Expose port 8000
-# --------------------------------------------------------
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+# Expose port 8000
 EXPOSE 8000
 
-# --------------------------------------------------------
-# 9. Run Laravel server when container starts
-# --------------------------------------------------------
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Start Laravel server
+CMD php artisan serve --host=0.0.0.0 --port=8000
