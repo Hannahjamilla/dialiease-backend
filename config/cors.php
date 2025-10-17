@@ -2,12 +2,17 @@
 
 return [
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cross-Origin Resource Sharing (CORS) Configuration
+    |--------------------------------------------------------------------------
+    */
+
     'paths' => [
         'api/*',
         'sanctum/csrf-cookie',
         'login',
         'logout',
-        '*', // ✅ Add this to catch all routes
     ],
 
     'allowed_methods' => ['*'],
@@ -18,7 +23,7 @@ return [
         'http://localhost:8000',
         'http://127.0.0.1:8000',
         'https://dialiease-4un0.onrender.com',
-        'https://dialiease-backend-1.onrender.com' // ✅ Add backend URL too
+        'https://dialiease-backend-1.onrender.com',
     ],
 
     'allowed_origins_patterns' => [],
@@ -26,7 +31,9 @@ return [
     'allowed_headers' => ['*'],
 
     'exposed_headers' => [
-        'Authorization', // ✅ Add this for Sanctum
+        'Authorization',
+        'X-CSRF-TOKEN',
+        'X-Requested-With',
     ],
 
     'max_age' => 0,
