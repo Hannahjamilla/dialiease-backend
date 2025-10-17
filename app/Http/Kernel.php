@@ -22,6 +22,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \Illuminate\Http\Middleware\HandleCors::class, // Add CORS handler here
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        \App\Http\Middleware\CorsMiddleware::class,
     ];
 
     /**
