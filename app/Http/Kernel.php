@@ -3,9 +3,8 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Illuminate\Console\Scheduling\Schedule;
-
 
 class Kernel extends HttpKernel
 {
@@ -20,6 +19,8 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \Illuminate\Http\Middleware\HandleCors::class, // Add CORS handler here
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
     ];
 
@@ -42,6 +43,7 @@ class Kernel extends HttpKernel
             EnsureFrontendRequestsAreStateful::class,  // This handles Sanctum stateful authentication for SPA
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \Illuminate\Http\Middleware\HandleCors::class, // Add CORS to API group too
         ],
     ];
 
@@ -63,10 +65,11 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'cors' => \App\Http\Middleware\CorsMiddleware::class, // Add custom CORS middleware
     ];
-protected function schedule(Schedule $schedule)
-{
-    $schedule->command('reminders:send')->everyFourHours();
-}
-    
+
+    protected function schedule(Schedule $schedule)
+    {
+        $schedule->command('reminders:send')->everyFourHours();
+    }
 }
