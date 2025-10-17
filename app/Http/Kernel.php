@@ -20,9 +20,9 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \Illuminate\Http\Middleware\HandleCors::class, // Add CORS handler here
+        \Illuminate\Http\Middleware\HandleCors::class, // ✅ Use ONLY Laravel's built-in CORS
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        \App\Http\Middleware\CorsMiddleware::class,
+        // ❌ REMOVE: \App\Http\Middleware\CorsMiddleware::class, (duplicate)
     ];
 
     /**
@@ -41,10 +41,10 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            EnsureFrontendRequestsAreStateful::class,  // This handles Sanctum stateful authentication for SPA
+            EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \Illuminate\Http\Middleware\HandleCors::class, // Add CORS to API group too
+            \Illuminate\Http\Middleware\HandleCors::class, // ✅ Keep in API group
         ],
     ];
 
@@ -66,7 +66,7 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'cors' => \App\Http\Middleware\CorsMiddleware::class, // Add custom CORS middleware
+        // ❌ REMOVE or comment out: 'cors' => \App\Http\Middleware\CorsMiddleware::class,
     ];
 
     protected function schedule(Schedule $schedule)

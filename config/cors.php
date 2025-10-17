@@ -7,6 +7,7 @@ return [
         'sanctum/csrf-cookie',
         'login',
         'logout',
+        '*', // ✅ Add this to catch all routes
     ],
 
     'allowed_methods' => ['*'],
@@ -16,16 +17,20 @@ return [
         'http://127.0.0.1:5173',
         'http://localhost:8000',
         'http://127.0.0.1:8000',
-        'https://dialiease-4un0.onrender.com',   // ✅ Frontend (Render)
+        'https://dialiease-4un0.onrender.com',
+        'https://dialiease-backend-1.onrender.com' // ✅ Add backend URL too
     ],
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+    'exposed_headers' => [
+        'Authorization', // ✅ Add this for Sanctum
+    ],
 
     'max_age' => 0,
 
-    'supports_credentials' => true,  // ✅ Keep this true for auth
+    'supports_credentials' => true,
+
 ];
