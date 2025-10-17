@@ -30,17 +30,13 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi -
 # Copy the rest of the application files
 COPY . /var/www
 
-# Ensure correct permissions before artisan commands
+# Ensure correct permissions
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 0755 /var/www/storage /var/www/bootstrap/cache
 
-# If .env is missing, copy .env.example to .env, then generate app key
-# (this avoids failure when .env is not present during build)
-RUN if [ ! -f /var/www/.env ]; then \
-      if [ -f /var/www/.env.example ]; then cp /var/www/.env.example /var/www/.env; \
-      else echo "Warning: .env.example not found"; fi; \
-    fi \
-    && php artisan key:generate --ansi
+# IMPORTANT: Do NOT run php artisan key:generate here.
+# We expect APP_KEY to be provided at runtime via environment variables (Render).
+# If APP_KEY is not provided at runtime, Laravel will still boot but encryption may fail for sessions/encrypted data.
 
 # Final permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
