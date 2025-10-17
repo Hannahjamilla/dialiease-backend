@@ -1,5 +1,3 @@
-<?php
-
 return [
 
     'paths' => [
@@ -7,28 +5,25 @@ return [
         'sanctum/csrf-cookie',
         'login',
         'logout',
+        'register',
+        'user',
     ],
 
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://dialiease-4un0.onrender.com', // frontend
-        'https://dialiease-backend-1.onrender.com', // backend itself
-        'http://localhost:5173', // dev
-        'http://127.0.0.1:5173',
+        'https://dialiease-4un0.onrender.com', // your frontend URL on Render
+        'http://localhost:5173',               // for local development
     ],
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [
-        'Authorization',
-        'X-CSRF-TOKEN',
-        'X-Requested-With',
-    ],
+    'exposed_headers' => [],
 
     'max_age' => 0,
 
     'supports_credentials' => true,
+
 ];
