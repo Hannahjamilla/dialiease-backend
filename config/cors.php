@@ -1,32 +1,29 @@
 <?php
 
 return [
+
     'paths' => [
         'api/*',
-        'iot/*',  // Explicitly include IoT endpoints
+        'iot/*',
         'sanctum/csrf-cookie',
         'login',
         'logout',
         'patient/*',
-        'treatment/*'  // Add if you have specific treatment routes
+        'treatment/*',
     ],
 
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'http://localhost:5173',  // Your Vite/React dev server
-        'http://localhost:8000',  // Laravel dev server
-        'http://127.0.0.1:5173',  // Alternative localhost
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:8000',
         'http://127.0.0.1:8000',
-        'https://dialiase.vercel.app',            // React (Vercel) production URL
-        'https://dialiase-api.onrender.com',
+        'https://dialiease-4un0.onrender.com',     // ✅ Frontend (Render)
+        'https://dialiease-backend-1.onrender.com' // ✅ Backend (Render)
     ],
-    'supports_credentials' => false, // set true only if you use cookies/sessions across domains
 
-    'allowed_origins_patterns' => [
-        // For dynamic subdomains if needed
-        // '^https?://([a-z0-9-]+\.)?yourdomain\.com$',
-    ],
+    'allowed_origins_patterns' => [],
 
     'allowed_headers' => [
         'Content-Type',
@@ -34,19 +31,19 @@ return [
         'Authorization',
         'Accept',
         'X-CSRF-TOKEN',
-        'X-Device-ID',  // For IoT device identification
-        'X-Requested-Device'  // Custom headers your IoT might use
+        'X-Device-ID',
+        'X-Requested-Device',
     ],
 
     'exposed_headers' => [
         'Authorization',
         'X-CSRF-TOKEN',
-        'X-Device-Status',  // For IoT status responses
+        'X-Device-Status',
         'X-RateLimit-Limit',
-        'X-RateLimit-Remaining'
+        'X-RateLimit-Remaining',
     ],
 
-    'max_age' => 60 * 60 * 24, // 24 hours
+    'max_age' => 86400, // 24 hours
 
-    'supports_credentials' => true,  // Important for sessions/cookies
+    'supports_credentials' => true, // ✅ only one instance of this
 ];
