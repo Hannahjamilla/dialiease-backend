@@ -20,9 +20,8 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \Illuminate\Http\Middleware\HandleCors::class, // ✅ Use ONLY Laravel's built-in CORS
+        \Illuminate\Http\Middleware\HandleCors::class, // Laravel's built-in CORS
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        // ❌ REMOVE: \App\Http\Middleware\CorsMiddleware::class, (duplicate)
     ];
 
     /**
@@ -44,7 +43,7 @@ class Kernel extends HttpKernel
             EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \Illuminate\Http\Middleware\HandleCors::class, // ✅ Keep in API group
+            // Note: HandleCors is registered globally above, no need to duplicate here.
         ],
     ];
 
@@ -66,7 +65,7 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        // ❌ REMOVE or comment out: 'cors' => \App\Http\Middleware\CorsMiddleware::class,
+        // custom middleware entries (like 'cors') removed to avoid duplicates
     ];
 
     protected function schedule(Schedule $schedule)
