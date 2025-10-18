@@ -12,13 +12,11 @@ class Kernel extends HttpKernel
      * Global HTTP middleware stack.
      */
     protected $middleware = [
-        \App\Http\Middleware\TrustProxies::class,
-        \Illuminate\Http\Middleware\HandleCors::class,
-        \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
+        \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \Fruitcake\Cors\HandleCors::class, // ✅ Correct CORS middleware
+        \Illuminate\Http\Middleware\HandleCors::class,  // ✅ CORS
     ];
 
     /**
@@ -35,10 +33,10 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            EnsureFrontendRequestsAreStateful::class, // ✅ Sanctum stateful
-            \Fruitcake\Cors\HandleCors::class,        // ✅ CORS here too
+            EnsureFrontendRequestsAreStateful::class,   // ✅ Sanctum SPA support
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \Illuminate\Http\Middleware\HandleCors::class,  // ✅ CORS for API
         ],
     ];
 
