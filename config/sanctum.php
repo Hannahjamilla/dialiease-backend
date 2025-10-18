@@ -9,7 +9,7 @@ return [
 
     'guard' => ['web'],
 
-    'expiration' => null,
+    'expiration' => 60 * 24, // 24 hours in minutes
 
     'middleware' => [
         'verify_csrf_token' => App\Http\Middleware\VerifyCsrfToken::class,

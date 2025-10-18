@@ -78,13 +78,58 @@ use App\Http\Controllers\ProductDetailModalController;
 use App\Http\Controllers\OrderController;
 
 // CSRF Cookie Route - MUST BE FIRST
+// ==================== CORS FIXES - MUST BE FIRST ====================
+
+// Handle preflight OPTIONS requests for ALL routes
+Route::options('/{any}', function () {
+    return response()->json()
+        ->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN, Accept')
+        ->header('Access-Control-Allow-Credentials', 'true')
+        ->header('Access-Control-Expose-Headers', 'X-CSRF-TOKEN');
+})->where('any', '.*');
+
+// CSRF Cookie Route - FIXED VERSION
 Route::get('/sanctum/csrf-cookie', function (Request $request) {
-    return response()->noContent()->withHeaders([
-        'Access-Control-Allow-Origin' => 'https://dialiease-4un0.onrender.com',
-        'Access-Control-Allow-Credentials' => 'true',
-        'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers' => 'Accept, Authorization, Content-Type, X-Requested-With, X-CSRF-TOKEN',
+    $response = response()->json([
+        'message' => 'CSRF cookie set successfully',
+        'csrf_token' => csrf_token()
     ]);
+    
+    return $response
+        ->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN, Accept')
+        ->header('Access-Control-Allow-Credentials', 'true')
+        ->header('Access-Control-Expose-Headers', 'X-CSRF-TOKEN')
+        ->cookie('XSRF-TOKEN', csrf_token(), 60 * 24 * 120, '/', '.onrender.com', true, false);
+});
+
+// Health Check Route
+Route::get('/', function () {
+    return response()->json(['message' => 'Backend API connected ✅'])
+        ->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+        ->header('Access-Control-Allow-Credentials', 'true');
+});
+
+// ==================== PUBLIC ROUTES ====================
+
+// Login Route with CORS headers
+Route::post('/login', [LoginController::class, 'login']);
+
+// Test route to verify CORS is working
+Route::get('/test-cors', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'CORS is working!',
+        'cors_headers' => [
+            'Access-Control-Allow-Origin' => 'https://dialiease-4un0.onrender.com',
+            'Access-Control-Allow-Credentials' => 'true'
+        ]
+    ])
+    ->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+    ->header('Access-Control-Allow-Credentials', 'true');
 });
 
 // Health Check Route
