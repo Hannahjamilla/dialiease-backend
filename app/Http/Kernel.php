@@ -9,25 +9,19 @@ use Illuminate\Console\Scheduling\Schedule;
 class Kernel extends HttpKernel
 {
     /**
-     * The application's global HTTP middleware stack.
-     *
-     * These middleware are run during every request to your application.
-     *
-     * @var array
+     * Global HTTP middleware stack.
      */
     protected $middleware = [
         \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \Illuminate\Http\Middleware\HandleCors::class, // Laravel's built-in CORS
+        \Illuminate\Http\Middleware\HandleCors::class, // ✅ Laravel built-in CORS
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
     ];
 
     /**
-     * The application's route middleware groups.
-     *
-     * @var array
+     * Middleware groups.
      */
     protected $middlewareGroups = [
         'web' => [
@@ -43,16 +37,12 @@ class Kernel extends HttpKernel
             EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            // Note: HandleCors is registered globally above, no need to duplicate here.
+            \Illuminate\Http\Middleware\HandleCors::class, // ✅ here too
         ],
     ];
 
     /**
-     * The application's route middleware.
-     *
-     * These middleware may be assigned to groups or used individually.
-     *
-     * @var array
+     * Route middleware.
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
@@ -65,7 +55,6 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        // custom middleware entries (like 'cors') removed to avoid duplicates
     ];
 
     protected function schedule(Schedule $schedule)
