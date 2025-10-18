@@ -28,7 +28,8 @@ class LoginController extends Controller
             $this->logAudit(null, "Failed login attempt - email: {$credentials['email']}");
             return response()->json([
                 'message' => 'Invalid credentials'
-            ], 401);
+            ], 401)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                  ->header('Access-Control-Allow-Credentials', 'true');
         }
 
         // Check if it's an employee type and has pre-register status
@@ -46,12 +47,14 @@ class LoginController extends Controller
                         'user' => $user,
                         'requires_credential_change' => true,
                         'message' => 'Please update your credentials to complete registration'
-                    ]);
+                    ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
                 } else {
                     $this->logAudit($user->userID, "Failed login attempt - invalid temporary password");
                     return response()->json([
                         'message' => 'Invalid temporary password'
-                    ], 401);
+                    ], 401)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                          ->header('Access-Control-Allow-Credentials', 'true');
                 }
             }
             
@@ -59,7 +62,8 @@ class LoginController extends Controller
             if ($user->status === 'inactive') {
                 return response()->json([
                     'message' => 'Your account is inactive. Please contact administrator.'
-                ], 403);
+                ], 403)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
             }
         }
 
@@ -68,7 +72,8 @@ class LoginController extends Controller
             $this->logAudit($user->userID, "Failed login attempt - invalid password");
             return response()->json([
                 'message' => 'Invalid credentials'
-            ], 401);
+            ], 401)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                  ->header('Access-Control-Allow-Credentials', 'true');
         }
 
         $user = Auth::user();
@@ -78,7 +83,8 @@ class LoginController extends Controller
             Auth::logout();
             return response()->json([
                 'message' => 'Your account is not active. Please contact administrator.'
-            ], 403);
+            ], 403)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                  ->header('Access-Control-Allow-Credentials', 'true');
         }
 
         $token = $user->createToken('api-token')->plainTextToken;
@@ -89,7 +95,8 @@ class LoginController extends Controller
             'token' => $token,
             'user' => $user,
             'requires_credential_change' => false
-        ]);
+        ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+          ->header('Access-Control-Allow-Credentials', 'true');
     }
 
     public function sendVerificationCode(Request $request)
@@ -104,14 +111,16 @@ class LoginController extends Controller
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
-            ], 422);
+            ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                  ->header('Access-Control-Allow-Credentials', 'true');
         }
 
         // Check if email is different from current
         if ($user->email === $request->email) {
             return response()->json([
                 'message' => 'Please enter a new email address different from your current one'
-            ], 422);
+            ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                  ->header('Access-Control-Allow-Credentials', 'true');
         }
 
         try {
@@ -134,13 +143,15 @@ class LoginController extends Controller
             return response()->json([
                 'message' => 'Verification code sent successfully',
                 'verification_sent' => true
-            ]);
+            ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+              ->header('Access-Control-Allow-Credentials', 'true');
 
         } catch (\Exception $e) {
             Log::error('Verification code sending error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to send verification code. Please try again.'
-            ], 500);
+            ], 500)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                  ->header('Access-Control-Allow-Credentials', 'true');
         }
     }
 
@@ -157,7 +168,8 @@ class LoginController extends Controller
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
-            ], 422);
+            ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                  ->header('Access-Control-Allow-Credentials', 'true');
         }
 
         try {
@@ -170,7 +182,8 @@ class LoginController extends Controller
                 !isset($verificationData['pending_email'])) {
                 return response()->json([
                     'message' => 'No verification code found. Please request a new one.'
-                ], 422);
+                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
             }
 
             // Check if verification code matches
@@ -178,7 +191,8 @@ class LoginController extends Controller
                 $this->logAudit($user->userID, "Failed email verification - invalid code");
                 return response()->json([
                     'message' => 'Invalid verification code'
-                ], 422);
+                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
             }
 
             // Check if code is expired (15 minutes)
@@ -187,7 +201,8 @@ class LoginController extends Controller
                 $this->logAudit($user->userID, "Failed email verification - code expired");
                 return response()->json([
                     'message' => 'Verification code has expired. Please request a new one.'
-                ], 422);
+                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
             }
 
             // Check if email matches
@@ -195,7 +210,8 @@ class LoginController extends Controller
                 $this->logAudit($user->userID, "Failed email verification - email mismatch");
                 return response()->json([
                     'message' => 'Email does not match the one we sent the code to'
-                ], 422);
+                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
             }
 
             $this->logAudit($user->userID, "Email verified successfully: " . $request->email);
@@ -203,13 +219,15 @@ class LoginController extends Controller
             return response()->json([
                 'message' => 'Email verified successfully',
                 'email_verified' => true
-            ]);
+            ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+              ->header('Access-Control-Allow-Credentials', 'true');
 
         } catch (\Exception $e) {
             Log::error('Email verification error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to verify email'
-            ], 500);
+            ], 500)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                  ->header('Access-Control-Allow-Credentials', 'true');
         }
     }
 
@@ -231,7 +249,8 @@ class LoginController extends Controller
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
-            ], 422);
+            ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                  ->header('Access-Control-Allow-Credentials', 'true');
         }
 
         try {
@@ -240,7 +259,8 @@ class LoginController extends Controller
                 $this->logAudit($user->userID, "Account activation failed - invalid current password");
                 return response()->json([
                     'message' => 'Current password is incorrect'
-                ], 422);
+                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
             }
 
             // Retrieve verification data
@@ -252,7 +272,8 @@ class LoginController extends Controller
                 !isset($verificationData['pending_email'])) {
                 return response()->json([
                     'message' => 'No verification code found. Please request a new one.'
-                ], 422);
+                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
             }
 
             // Check if verification code matches
@@ -260,7 +281,8 @@ class LoginController extends Controller
                 $this->logAudit($user->userID, "Account activation failed - invalid verification code");
                 return response()->json([
                     'message' => 'Invalid verification code'
-                ], 422);
+                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
             }
 
             // Check if code is expired (15 minutes)
@@ -269,7 +291,8 @@ class LoginController extends Controller
                 $this->logAudit($user->userID, "Account activation failed - code expired");
                 return response()->json([
                     'message' => 'Verification code has expired. Please request a new one.'
-                ], 422);
+                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
             }
 
             // Check if email matches
@@ -277,7 +300,8 @@ class LoginController extends Controller
                 $this->logAudit($user->userID, "Account activation failed - email mismatch");
                 return response()->json([
                     'message' => 'Email does not match the one we sent the code to'
-                ], 422);
+                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                      ->header('Access-Control-Allow-Credentials', 'true');
             }
 
             // Update all credentials and activate account
@@ -297,13 +321,15 @@ class LoginController extends Controller
                 'message' => 'Registration completed successfully. Your account is now active. Please login with your new credentials.',
                 'registration_completed' => true,
                 'account_activated' => true
-            ]);
+            ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+              ->header('Access-Control-Allow-Credentials', 'true');
 
         } catch (\Exception $e) {
             Log::error('Account activation error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to complete registration: ' . $e->getMessage()
-            ], 500);
+            ], 500)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+                  ->header('Access-Control-Allow-Credentials', 'true');
         }
     }
 
@@ -319,7 +345,8 @@ class LoginController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Logged out successfully'
-        ]);
+        ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
+          ->header('Access-Control-Allow-Credentials', 'true');
     }
 
     private function logAudit($userID, $action)
