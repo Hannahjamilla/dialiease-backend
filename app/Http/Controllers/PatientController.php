@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class PatientAlertController extends Controller
+class PatientController extends Controller
 {
     // Get doctor alerts for the authenticated patient
     public function getDoctorAlerts()
