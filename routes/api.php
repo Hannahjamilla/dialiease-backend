@@ -74,8 +74,6 @@ use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\UserProdReviewController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\WishlistController;
-use App\Http\Controllers\CheckoutModalController;
-use App\Http\Controllers\PaymongoController;
 use App\Http\Controllers\MedsProdController;
 use App\Http\Controllers\PatientOrdersController;
 use App\Http\Controllers\ProductDetailModalController;
@@ -742,18 +740,6 @@ Route::get('/test', function () {
     ]);
 });
 
-    // Checkout routes
-// Checkout routes
-Route::post('/checkout/orders/create', [CheckoutModalController::class, 'createOrder']);
-Route::get('/checkout/orders', [CheckoutModalController::class, 'getUserOrders']);
-Route::get('/checkout/orders/{orderID}', [CheckoutModalController::class, 'getOrderDetails']);
-Route::post('/checkout/orders/{orderID}/cancel', [CheckoutModalController::class, 'cancelOrder']);
-Route::post('/checkout/orders/{orderID}/process-payment', [CheckoutModalController::class, 'processPayment']);
-Route::post('/checkout/orders/{orderID}/verify-payment', [CheckoutModalController::class, 'verifyPayment']);
-Route::post('/checkout/orders/{orderID}/create-payment-intent', [CheckoutModalController::class, 'createPaymentIntent']);
-Route::post('/checkout/orders/{orderID}/process-payment-with-method', [CheckoutModalController::class, 'processPaymentWithMethod']);
-Route::post('/checkout/create-payment-method', [CheckoutModalController::class, 'createPaymentMethod']);
-Route::get('/checkout/available-pickup-dates', [CheckoutModalController::class, 'getAvailablePickupDates']);
 });
 
 
@@ -801,8 +787,6 @@ Route::middleware('api')->group(function () {
     });
 });
 
-// Public Paymongo Webhook (no auth required)
-Route::post('/paymongo/webhook', [PaymongoController::class, 'handleWebhook']);
 
 // Fallback route for API health check
 Route::get('/health', function () {

@@ -12,13 +12,12 @@ class Kernel extends HttpKernel
      * Global HTTP middleware stack.
      */
     protected $middleware = [
-        \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
-        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
-        \App\Http\Middleware\TrimStrings::class,
-        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \Illuminate\Http\Middleware\HandleCors::class, // ✅ Laravel built-in CORS
-        \Illuminate\Routing\Middleware\SubstituteBindings::class,
-    ];
+    \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
+    \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+    \App\Http\Middleware\TrimStrings::class,
+    \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+    \Illuminate\Http\Middleware\HandleCors::class, // ✅ Keep this
+];
 
     /**
      * Middleware groups.
