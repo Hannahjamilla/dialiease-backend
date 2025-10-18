@@ -77,7 +77,6 @@ use App\Http\Controllers\PatientOrdersController;
 use App\Http\Controllers\ProductDetailModalController;
 use App\Http\Controllers\OrderController;
 
-// CSRF Cookie Route - MUST BE FIRST
 // ==================== CORS FIXES - MUST BE FIRST ====================
 
 // Handle preflight OPTIONS requests for ALL routes
@@ -113,11 +112,6 @@ Route::get('/', function () {
         ->header('Access-Control-Allow-Credentials', 'true');
 });
 
-// ==================== PUBLIC ROUTES ====================
-
-// Login Route with CORS headers
-Route::post('/login', [LoginController::class, 'login']);
-
 // Test route to verify CORS is working
 Route::get('/test-cors', function () {
     return response()->json([
@@ -132,13 +126,10 @@ Route::get('/test-cors', function () {
     ->header('Access-Control-Allow-Credentials', 'true');
 });
 
-// Health Check Route
-Route::get('/', function () {
-    return response()->json(['message' => 'Backend API connected ✅']);
-});
+// ==================== PUBLIC ROUTES ====================
 
-// Public Routes
-Route::post('/login', [LoginController::class, 'login'])->name('api.login');
+// Login Route
+Route::post('/login', [LoginController::class, 'login']);
 
 // Employee Registration & Validation
 Route::post('/validate-employee', [ValidateEmployeeController::class, 'validateEmployee']);
