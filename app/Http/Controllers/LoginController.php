@@ -14,8 +14,44 @@ use App\Mail\VerificationCodeMail;
 
 class LoginController extends Controller
 {
+    /**
+     * Handle preflight CORS requests
+     */
+    private function handleCors()
+    {
+        header('Access-Control-Allow-Origin: https://dialiease-4un0.onrender.com');
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN, Accept');
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Expose-Headers: X-CSRF-TOKEN');
+    }
+
+    /**
+     * Create CORS response
+     */
+    private function corsResponse($data = null, $status = 200)
+    {
+        $response = response()->json($data, $status);
+        
+        return $response->withHeaders([
+            'Access-Control-Allow-Origin' => 'https://dialiease-4un0.onrender.com',
+            'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN, Accept',
+            'Access-Control-Allow-Credentials' => 'true',
+            'Access-Control-Expose-Headers' => 'X-CSRF-TOKEN',
+        ]);
+    }
+
     public function login(Request $request)
     {
+        // Handle CORS headers
+        $this->handleCors();
+        
+        // Handle preflight OPTIONS request
+        if ($request->isMethod('options')) {
+            return $this->corsResponse();
+        }
+
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -26,10 +62,9 @@ class LoginController extends Controller
 
         if (!$user) {
             $this->logAudit(null, "Failed login attempt - email: {$credentials['email']}");
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Invalid credentials'
-            ], 401)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                  ->header('Access-Control-Allow-Credentials', 'true');
+            ], 401);
         }
 
         // Check if it's an employee type and has pre-register status
@@ -42,38 +77,34 @@ class LoginController extends Controller
                     
                     $this->logAudit($user->userID, "Logged in with pre-register status");
                     
-                    return response()->json([
+                    return $this->corsResponse([
                         'token' => $token,
                         'user' => $user,
                         'requires_credential_change' => true,
                         'message' => 'Please update your credentials to complete registration'
-                    ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                    ]);
                 } else {
                     $this->logAudit($user->userID, "Failed login attempt - invalid temporary password");
-                    return response()->json([
+                    return $this->corsResponse([
                         'message' => 'Invalid temporary password'
-                    ], 401)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                          ->header('Access-Control-Allow-Credentials', 'true');
+                    ], 401);
                 }
             }
             
             // Check if account is inactive
             if ($user->status === 'inactive') {
-                return response()->json([
+                return $this->corsResponse([
                     'message' => 'Your account is inactive. Please contact administrator.'
-                ], 403)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                ], 403);
             }
         }
 
         // Regular authentication for active users
         if (!Auth::attempt($credentials)) {
             $this->logAudit($user->userID, "Failed login attempt - invalid password");
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Invalid credentials'
-            ], 401)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                  ->header('Access-Control-Allow-Credentials', 'true');
+            ], 401);
         }
 
         $user = Auth::user();
@@ -81,26 +112,32 @@ class LoginController extends Controller
         // Final check if user is active
         if ($user->status === 'inactive') {
             Auth::logout();
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Your account is not active. Please contact administrator.'
-            ], 403)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                  ->header('Access-Control-Allow-Credentials', 'true');
+            ], 403);
         }
 
         $token = $user->createToken('api-token')->plainTextToken;
 
         $this->logAudit($user->userID, "Successful login");
 
-        return response()->json([
+        return $this->corsResponse([
             'token' => $token,
             'user' => $user,
             'requires_credential_change' => false
-        ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-          ->header('Access-Control-Allow-Credentials', 'true');
+        ]);
     }
 
     public function sendVerificationCode(Request $request)
     {
+        // Handle CORS headers
+        $this->handleCors();
+        
+        // Handle preflight OPTIONS request
+        if ($request->isMethod('options')) {
+            return $this->corsResponse();
+        }
+
         $user = $request->user();
         
         $validator = Validator::make($request->all(), [
@@ -108,19 +145,17 @@ class LoginController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
-            ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                  ->header('Access-Control-Allow-Credentials', 'true');
+            ], 422);
         }
 
         // Check if email is different from current
         if ($user->email === $request->email) {
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Please enter a new email address different from your current one'
-            ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                  ->header('Access-Control-Allow-Credentials', 'true');
+            ], 422);
         }
 
         try {
@@ -140,23 +175,29 @@ class LoginController extends Controller
 
             $this->logAudit($user->userID, "Verification code sent to new email: " . $request->email);
 
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Verification code sent successfully',
                 'verification_sent' => true
-            ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-              ->header('Access-Control-Allow-Credentials', 'true');
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Verification code sending error: ' . $e->getMessage());
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Failed to send verification code. Please try again.'
-            ], 500)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                  ->header('Access-Control-Allow-Credentials', 'true');
+            ], 500);
         }
     }
 
     public function verifyEmail(Request $request)
     {
+        // Handle CORS headers
+        $this->handleCors();
+        
+        // Handle preflight OPTIONS request
+        if ($request->isMethod('options')) {
+            return $this->corsResponse();
+        }
+
         $user = $request->user();
         
         $validator = Validator::make($request->all(), [
@@ -165,11 +206,10 @@ class LoginController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
-            ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                  ->header('Access-Control-Allow-Credentials', 'true');
+            ], 422);
         }
 
         try {
@@ -180,59 +220,61 @@ class LoginController extends Controller
                 !isset($verificationData['verification_code']) || 
                 !isset($verificationData['verification_sent_at']) ||
                 !isset($verificationData['pending_email'])) {
-                return response()->json([
+                return $this->corsResponse([
                     'message' => 'No verification code found. Please request a new one.'
-                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                ], 422);
             }
 
             // Check if verification code matches
             if ($verificationData['verification_code'] !== $request->verification_code) {
                 $this->logAudit($user->userID, "Failed email verification - invalid code");
-                return response()->json([
+                return $this->corsResponse([
                     'message' => 'Invalid verification code'
-                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                ], 422);
             }
 
             // Check if code is expired (15 minutes)
             $verificationSentAt = \Carbon\Carbon::parse($verificationData['verification_sent_at']);
             if (now()->diffInMinutes($verificationSentAt) > 15) {
                 $this->logAudit($user->userID, "Failed email verification - code expired");
-                return response()->json([
+                return $this->corsResponse([
                     'message' => 'Verification code has expired. Please request a new one.'
-                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                ], 422);
             }
 
             // Check if email matches
             if ($verificationData['pending_email'] !== $request->email) {
                 $this->logAudit($user->userID, "Failed email verification - email mismatch");
-                return response()->json([
+                return $this->corsResponse([
                     'message' => 'Email does not match the one we sent the code to'
-                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                ], 422);
             }
 
             $this->logAudit($user->userID, "Email verified successfully: " . $request->email);
 
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Email verified successfully',
                 'email_verified' => true
-            ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-              ->header('Access-Control-Allow-Credentials', 'true');
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Email verification error: ' . $e->getMessage());
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Failed to verify email'
-            ], 500)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                  ->header('Access-Control-Allow-Credentials', 'true');
+            ], 500);
         }
     }
 
     public function activateAccount(Request $request)
     {
+        // Handle CORS headers
+        $this->handleCors();
+        
+        // Handle preflight OPTIONS request
+        if ($request->isMethod('options')) {
+            return $this->corsResponse();
+        }
+
         $user = $request->user();
         
         $validator = Validator::make($request->all(), [
@@ -246,21 +288,19 @@ class LoginController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
-            ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                  ->header('Access-Control-Allow-Credentials', 'true');
+            ], 422);
         }
 
         try {
             // Verify current temporary password first
             if (!Hash::check($request->current_password, $user->password)) {
                 $this->logAudit($user->userID, "Account activation failed - invalid current password");
-                return response()->json([
+                return $this->corsResponse([
                     'message' => 'Current password is incorrect'
-                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                ], 422);
             }
 
             // Retrieve verification data
@@ -270,38 +310,34 @@ class LoginController extends Controller
                 !isset($verificationData['verification_code']) || 
                 !isset($verificationData['verification_sent_at']) ||
                 !isset($verificationData['pending_email'])) {
-                return response()->json([
+                return $this->corsResponse([
                     'message' => 'No verification code found. Please request a new one.'
-                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                ], 422);
             }
 
             // Check if verification code matches
             if ($verificationData['verification_code'] !== $request->verification_code) {
                 $this->logAudit($user->userID, "Account activation failed - invalid verification code");
-                return response()->json([
+                return $this->corsResponse([
                     'message' => 'Invalid verification code'
-                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                ], 422);
             }
 
             // Check if code is expired (15 minutes)
             $verificationSentAt = \Carbon\Carbon::parse($verificationData['verification_sent_at']);
             if (now()->diffInMinutes($verificationSentAt) > 15) {
                 $this->logAudit($user->userID, "Account activation failed - code expired");
-                return response()->json([
+                return $this->corsResponse([
                     'message' => 'Verification code has expired. Please request a new one.'
-                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                ], 422);
             }
 
             // Check if email matches
             if ($verificationData['pending_email'] !== $request->email) {
                 $this->logAudit($user->userID, "Account activation failed - email mismatch");
-                return response()->json([
+                return $this->corsResponse([
                     'message' => 'Email does not match the one we sent the code to'
-                ], 422)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                      ->header('Access-Control-Allow-Credentials', 'true');
+                ], 422);
             }
 
             // Update all credentials and activate account
@@ -317,24 +353,30 @@ class LoginController extends Controller
 
             $this->logAudit($user->userID, "Registration completed - account activated");
 
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Registration completed successfully. Your account is now active. Please login with your new credentials.',
                 'registration_completed' => true,
                 'account_activated' => true
-            ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-              ->header('Access-Control-Allow-Credentials', 'true');
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Account activation error: ' . $e->getMessage());
-            return response()->json([
+            return $this->corsResponse([
                 'message' => 'Failed to complete registration: ' . $e->getMessage()
-            ], 500)->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-                  ->header('Access-Control-Allow-Credentials', 'true');
+            ], 500);
         }
     }
 
     public function logout(Request $request)
     {
+        // Handle CORS headers
+        $this->handleCors();
+        
+        // Handle preflight OPTIONS request
+        if ($request->isMethod('options')) {
+            return $this->corsResponse();
+        }
+
         $user = $request->user();
         $userId = $user ? $user->userID : null;
         
@@ -342,11 +384,29 @@ class LoginController extends Controller
 
         $this->logAudit($userId, "Logged out");
 
-        return response()->json([
+        return $this->corsResponse([
             'success' => true,
             'message' => 'Logged out successfully'
-        ])->header('Access-Control-Allow-Origin', 'https://dialiease-4un0.onrender.com')
-          ->header('Access-Control-Allow-Credentials', 'true');
+        ]);
+    }
+
+    /**
+     * Handle CSRF cookie request - this is the endpoint that's failing
+     */
+    public function getCsrfCookie(Request $request)
+    {
+        // Handle CORS headers
+        $this->handleCors();
+        
+        // Handle preflight OPTIONS request
+        if ($request->isMethod('options')) {
+            return $this->corsResponse();
+        }
+
+        // This will set the CSRF cookie
+        return $this->corsResponse([
+            'message' => 'CSRF cookie set successfully'
+        ]);
     }
 
     private function logAudit($userID, $action)
